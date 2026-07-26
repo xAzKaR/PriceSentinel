@@ -1,0 +1,183 @@
+package br.com.azk.pricesentinel.application.service;
+
+import br.com.azk.pricesentinel.domain.enums.Store;
+import br.com.azk.pricesentinel.domain.model.ProductSearchResult;
+import br.com.azk.pricesentinel.domain.port.out.ProductSearchProvider;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class ProductSearchServiceTest {
+
+    @Mock
+    private ProductSearchProvider amazonProvider;
+
+    @Mock
+    private ProductSearchProvider kabumProvider;
+
+    private ProductSearchService service;
+
+    @BeforeEach
+    void setUp() {
+        service = new ProductSearchService(
+                List.of(
+                        amazonProvider,
+                        kabumProvider
+                )
+        );
+    }
+
+    @Test
+    void shouldSearchInAllProviders() {
+
+        // Given
+        ProductSearchResult amazonResult = mock(ProductSearchResult.class);
+        ProductSearchResult kabumResult = mock(ProductSearchResult.class);
+
+        when(amazonProvider.getStore()).thenReturn(Store.AMAZON);
+        when(kabumProvider.getStore()).thenReturn(Store.KABUM);
+
+        when(amazonProvider.search("Ryzen"))
+                .thenReturn(List.of(amazonResult));
+
+        when(kabumProvider.search("Ryzen"))
+                .thenReturn(List.of(kabumResult));
+
+        // When
+        List<ProductSearchResult> results = service.search("Ryzen");
+
+        // Then
+        assertEquals(2, results.size());
+        assertEquals(amazonResult, results.get(0));
+        assertEquals(kabumResult, results.get(1));
+
+        verify(amazonProvider).search("Ryzen");
+        verify(kabumProvider).search("Ryzen");
+    }
+
+    @Test
+    void shouldTrimQueryBeforeSearching() {
+
+        // Given
+        when(amazonProvider.getStore()).thenReturn(Store.AMAZON);
+        when(kabumProvider.getStore()).thenReturn(Store.KABUM);
+
+        when(amazonProvider.search("Ryzen"))
+                .thenReturn(List.of());
+
+        when(kabumProvider.search("Ryzen"))
+                .thenReturn(List.of());
+
+        // When
+        service.search("   Ryzen   ");
+
+        // Then
+        verify(amazonProvider).search("Ryzen");
+        verify(kabumProvider).search("Ryzen");
+    }
+
+    @Test
+    void shouldUseEmptyQueryWhenQueryIsNull() {
+
+        // Given
+        when(amazonProvider.getStore()).thenReturn(Store.AMAZON);
+        when(kabumProvider.getStore()).thenReturn(Store.KABUM);
+
+        when(amazonProvider.search(""))
+                .thenReturn(List.of());
+
+        when(kabumProvider.search(""))
+                .thenReturn(List.of());
+
+        // When
+        service.search(null);
+
+        // Then
+        verify(amazonProvider).search("");
+        verify(kabumProvider).search("");
+    }
+
+    @Test
+    void shouldContinueWhenProviderThrowsException() {
+
+        // Given
+        ProductSearchResult kabumResult = mock(ProductSearchResult.class);
+
+        when(amazonProvider.getStore()).thenReturn(Store.AMAZON);
+        when(kabumProvider.getStore()).thenReturn(Store.KABUM);
+
+        when(amazonProvider.search("Ryzen"))
+                .thenThrow(new RuntimeException("Provider unavailable"));
+
+        when(kabumProvider.search("Ryzen"))
+                .thenReturn(List.of(kabumResult));
+
+        // When
+        List<ProductSearchResult> results = service.search("Ryzen");
+
+        // Then
+        assertEquals(1, results.size());
+        assertEquals(kabumResult, results.getFirst());
+
+        verify(amazonProvider).search("Ryzen");
+        verify(kabumProvider).search("Ryzen");
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenProvidersReturnNothing() {
+
+        // Given
+        when(amazonProvider.getStore()).thenReturn(Store.AMAZON);
+        when(kabumProvider.getStore()).thenReturn(Store.KABUM);
+
+        when(amazonProvider.search("Ryzen"))
+                .thenReturn(List.of());
+
+        when(kabumProvider.search("Ryzen"))
+                .thenReturn(List.of());
+
+        // When
+        List<ProductSearchResult> results = service.search("Ryzen");
+
+        // Then
+        assertEquals(0, results.size());
+
+        verify(amazonProvider).search("Ryzen");
+        verify(kabumProvider).search("Ryzen");
+    }
+
+    @Test
+    void shouldReturnResultsFromSingleProvider() {
+
+        // Given
+        ProductSearchResult amazonResult = mock(ProductSearchResult.class);
+
+        when(amazonProvider.getStore()).thenReturn(Store.AMAZON);
+        when(kabumProvider.getStore()).thenReturn(Store.KABUM);
+
+        when(amazonProvider.search("Ryzen"))
+                .thenReturn(List.of(amazonResult));
+
+        when(kabumProvider.search("Ryzen"))
+                .thenReturn(List.of());
+
+        // When
+        List<ProductSearchResult> results = service.search("Ryzen");
+
+        // Then
+        assertEquals(1, results.size());
+        assertEquals(amazonResult, results.getFirst());
+
+        verify(amazonProvider).search("Ryzen");
+        verify(kabumProvider).search("Ryzen");
+    }
+
+}
