@@ -4,18 +4,20 @@ import br.com.azk.pricesentinel.domain.enums.Store;
 import br.com.azk.pricesentinel.domain.valueobject.Money;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
 @Builder
+@EqualsAndHashCode
 public class ProductSearchResult {
 
-    private Product product;
+    private final String name;
 
-    private Store store;
+    private final Store store;
 
-    private Money price;
+    private final Money price;
 
-    private String url;
+    private final String url;
 }
