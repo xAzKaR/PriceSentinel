@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,7 +37,7 @@ class ProductSearchServiceTest {
     }
 
     @Test
-    void shouldSearchInAllProviders() {
+    void shouldSearchInAllProviders() throws IOException {
 
         // Given
         ProductSearchResult amazonResult = mock(ProductSearchResult.class);
@@ -64,7 +65,7 @@ class ProductSearchServiceTest {
     }
 
     @Test
-    void shouldTrimQueryBeforeSearching() {
+    void shouldTrimQueryBeforeSearching() throws IOException {
 
         // Given
         when(amazonProvider.getStore()).thenReturn(Store.AMAZON);
@@ -85,7 +86,7 @@ class ProductSearchServiceTest {
     }
 
     @Test
-    void shouldUseEmptyQueryWhenQueryIsNull() {
+    void shouldUseEmptyQueryWhenQueryIsNull() throws IOException {
 
         // Given
         when(amazonProvider.getStore()).thenReturn(Store.AMAZON);
@@ -106,7 +107,7 @@ class ProductSearchServiceTest {
     }
 
     @Test
-    void shouldContinueWhenProviderThrowsException() {
+    void shouldContinueWhenProviderThrowsException() throws IOException {
 
         // Given
         ProductSearchResult kabumResult = mock(ProductSearchResult.class);
@@ -132,7 +133,7 @@ class ProductSearchServiceTest {
     }
 
     @Test
-    void shouldReturnEmptyListWhenProvidersReturnNothing() {
+    void shouldReturnEmptyListWhenProvidersReturnNothing() throws IOException {
 
         // Given
         when(amazonProvider.getStore()).thenReturn(Store.AMAZON);
@@ -155,7 +156,7 @@ class ProductSearchServiceTest {
     }
 
     @Test
-    void shouldReturnResultsFromSingleProvider() {
+    void shouldReturnResultsFromSingleProvider() throws IOException {
 
         // Given
         ProductSearchResult amazonResult = mock(ProductSearchResult.class);

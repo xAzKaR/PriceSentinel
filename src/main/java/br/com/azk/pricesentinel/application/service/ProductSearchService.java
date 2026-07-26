@@ -26,7 +26,7 @@ public class ProductSearchService {
             searchInProvider(provider, normalizedQuery, results);
         }
 
-        return results;
+        return mergeResults(results);
     }
 
     private void searchInProvider(
@@ -62,6 +62,8 @@ public class ProductSearchService {
         // - remover acentos
         // - converter para minúsculas
         // - remover caracteres especiais
+        // - Adicionar dentro da query a quantidade correta de itens na pesquisa
+        // - Query condicional, não repetir mais de um produto (Da mesma loja com o mesmo preço)
 
         return query == null
                 ? ""
@@ -71,7 +73,7 @@ public class ProductSearchService {
     private List<ProductSearchResult> mergeResults(
             List<ProductSearchResult> results) {
 
-        return mergeResults(results);
+        return List.copyOf(results);
     }
 
 }

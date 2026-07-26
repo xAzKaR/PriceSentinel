@@ -1,5 +1,7 @@
 package br.com.azk.pricesentinel.domain.valueobject;
 
+import org.jsoup.nodes.Element;
+
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.Locale;
