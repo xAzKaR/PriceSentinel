@@ -71,7 +71,7 @@ public class ProductSearchService {
     private List<ProductSearchResult> mergeResults(
             List<ProductSearchResult> results) {
 
-        return results;
+        return mergeResults(results);
     }
 
 }
