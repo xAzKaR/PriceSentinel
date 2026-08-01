@@ -37,6 +37,7 @@ public class PriceSentinelProperties {
     @Setter
     public static class ProductConfig {
         private String name;
+        private String id;
         private BigDecimal targetPrice;
     }
 

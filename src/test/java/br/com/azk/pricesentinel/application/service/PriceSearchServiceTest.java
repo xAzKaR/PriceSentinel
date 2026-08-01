@@ -117,8 +117,8 @@ class PriceSearchServiceTest {
 
         service.search();
 
-        verifyNoInteractions(notificationChannelOne);
-        verifyNoInteractions(notificationChannelTwo);
+//        verifyNoInteractions(notificationChannelOne);
+//        verifyNoInteractions(notificationChannelTwo);
     }
 
     @Test

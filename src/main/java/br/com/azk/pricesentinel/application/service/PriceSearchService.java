@@ -58,8 +58,17 @@ public class PriceSearchService {
     private void processResult(
             PriceTarget target,
             PriceResult result) {
-        if (result.getPrice().isLessThanOrEqual(target.getTargetPrice())) {
-            notificationChannels.forEach(channel -> channel.send(result));
+
+        if (result.getPrice() == null || target.getTargetPrice() == null) {
+            log.warn("Produto ignorado por não possuir preço.");
+            return;
         }
+
+//TODO Comentado temporariamente 31/07/2026
+//        if (result.getPrice().isLessThanOrEqual(target.getTargetPrice())) {
+//            notificationChannels.forEach(channel -> channel.send(result));
+//        }
+
+        notificationChannels.forEach(channel -> channel.send(result));
     }
 }
