@@ -3,10 +3,12 @@ package br.com.azk.pricesentinel.infrastructure.scraper.jsoup;
 import br.com.azk.pricesentinel.domain.enums.Store;
 import br.com.azk.pricesentinel.domain.model.ProductSearchResult;
 import br.com.azk.pricesentinel.domain.valueobject.Money;
+import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Component;
 
 @Component
+@Slf4j
 public class AmazonProductMapper {
 
     public ProductSearchResult toProduct(Element card) {
@@ -16,6 +18,11 @@ public class AmazonProductMapper {
         String url = extractUrl(card);
 
         Money price = extractPrice(card);
+
+        if (price == null) {
+            log.debug("Card ignorado por não possuir preço");
+            return null;
+        }
 
         return ProductSearchResult.builder()
                 .name(name)
@@ -32,6 +39,7 @@ public class AmazonProductMapper {
         Element title = card.selectFirst("h2 span");
 
         if (title == null) {
+            log.debug("Card ignorado por não possuir nome");
             return "";
         }
 
@@ -42,19 +50,32 @@ public class AmazonProductMapper {
     private Money extractPrice(Element card) {
 
         String text = extractPriceText(card);
+        log.info("Preço bruto: '{}'", text);
 
         if (text.isBlank()) {
             return null;
         }
 
-        return Money.of(normalizePrice(text));
+        String normalized = normalizePrice(text);
+        log.info("Preço normalizado: '{}'", normalized);
+
+        try {
+            return Money.of(normalized);
+        } catch (Exception ex) {
+            log.error(
+                    "Erro convertendo preço bruto='{}' normalizado='{}'",
+                    text,
+                    normalized,
+                    ex);
+            return null;
+        }
 
     }
 
 
     private String extractUrl(Element card) {
 
-        Element link = card.selectFirst("h2 a");
+        Element link = card.selectFirst("a[href]");
 
         if (link == null) {
             return "";
@@ -62,8 +83,11 @@ public class AmazonProductMapper {
 
         String href = link.attr("href");
 
-        return "https://www.amazon.com.br" + href;
+        if (!href.startsWith("/")) {
+            return href;
+        }
 
+        return "https://www.amazon.com.br" + href;
     }
 
 
@@ -76,8 +100,13 @@ public class AmazonProductMapper {
             return "";
         }
 
-        return whole.text() + "," + fraction.text();
+        String integer = whole.text()
+                .replaceAll("[^0-9]", "");
 
+        String decimal = fraction.text()
+                .replaceAll("[^0-9]", "");
+
+        return integer + "," + decimal;
     }
 
 

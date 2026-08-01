@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -15,6 +16,8 @@ import java.util.List;
 public class ProductSearchService {
 
     private final List<ProductSearchProvider> providers;
+
+    private final ProductMergeService mergeService;
 
     public List<ProductSearchResult> search(String query) {
 
@@ -26,7 +29,7 @@ public class ProductSearchService {
             searchInProvider(provider, normalizedQuery, results);
         }
 
-        return mergeResults(results);
+        return mergeService.merge(results);
     }
 
     private void searchInProvider(
@@ -68,12 +71,6 @@ public class ProductSearchService {
         return query == null
                 ? ""
                 : query.trim();
-    }
-
-    private List<ProductSearchResult> mergeResults(
-            List<ProductSearchResult> results) {
-
-        return List.copyOf(results);
     }
 
 }

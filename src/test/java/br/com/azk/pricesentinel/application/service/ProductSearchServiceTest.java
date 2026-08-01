@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -24,16 +25,24 @@ class ProductSearchServiceTest {
     @Mock
     private ProductSearchProvider kabumProvider;
 
+    @Mock
+    private ProductMergeService mergeService;
+
     private ProductSearchService service;
 
     @BeforeEach
     void setUp() {
+
         service = new ProductSearchService(
                 List.of(
                         amazonProvider,
                         kabumProvider
-                )
+                ),
+                mergeService
         );
+
+        lenient().when(mergeService.merge(anyList()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test
@@ -170,6 +179,9 @@ class ProductSearchServiceTest {
         when(kabumProvider.search("Ryzen"))
                 .thenReturn(List.of());
 
+        when(mergeService.merge(anyList()))
+                .thenReturn(List.of(amazonResult));
+
         // When
         List<ProductSearchResult> results = service.search("Ryzen");
 
@@ -179,6 +191,39 @@ class ProductSearchServiceTest {
 
         verify(amazonProvider).search("Ryzen");
         verify(kabumProvider).search("Ryzen");
+        verify(mergeService).merge(anyList());
     }
 
+    @Test
+    void shouldDelegateResultsToMergeService2() throws IOException {
+
+        ProductSearchResult amazonResult = mock(ProductSearchResult.class);
+
+        when(amazonProvider.getStore()).thenReturn(Store.AMAZON);
+        when(kabumProvider.getStore()).thenReturn(Store.KABUM);
+
+        when(amazonProvider.search("Ryzen"))
+                .thenReturn(List.of(amazonResult));
+
+        when(kabumProvider.search("Ryzen"))
+                .thenReturn(List.of());
+
+        when(mergeService.merge(anyList()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.search("Ryzen");
+
+        verify(mergeService).merge(argThat(list ->
+                list.size() == 1 &&
+                        list.contains(amazonResult)
+        ));
+    }
+
+    private List<ProductSearchResult> mergeResults(
+            List<ProductSearchResult> results) {
+
+        return results.stream()
+                .filter(Objects::nonNull)
+                .toList();
+    }
 }

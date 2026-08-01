@@ -13,14 +13,13 @@ import java.nio.charset.StandardCharsets;
 public abstract class AbstractJsoupScraper {
     private static final int TIMEOUT = 10000;
 
-    protected Document connect(String url) {
-
+    protected Document getDocument(String url) {
         try {
             log.info("Conectando à URL: {}", url);
 
-            return createConnection(url)
-                    .get();
+            return createConnection(url).get();
         } catch (IOException ex) {
+
             throw new RuntimeException(
                     "Erro ao conectar na URL: " + url,
                     ex);
@@ -42,10 +41,6 @@ public abstract class AbstractJsoupScraper {
     }
 
     protected abstract String buildSearchUrl(String query);
-
-    protected Document getDocument(String url) throws IOException {
-        return createConnection(url).get();
-    }
 
     protected String encode(String value) {
         return URLEncoder.encode(value, StandardCharsets.UTF_8);
