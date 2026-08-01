@@ -9,7 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -23,20 +25,28 @@ class ProductSearchServiceTest {
     @Mock
     private ProductSearchProvider kabumProvider;
 
+    @Mock
+    private ProductMergeService mergeService;
+
     private ProductSearchService service;
 
     @BeforeEach
     void setUp() {
+
         service = new ProductSearchService(
                 List.of(
                         amazonProvider,
                         kabumProvider
-                )
+                ),
+                mergeService
         );
+
+        lenient().when(mergeService.merge(anyList()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test
-    void shouldSearchInAllProviders() {
+    void shouldSearchInAllProviders() throws IOException {
 
         // Given
         ProductSearchResult amazonResult = mock(ProductSearchResult.class);
@@ -64,7 +74,7 @@ class ProductSearchServiceTest {
     }
 
     @Test
-    void shouldTrimQueryBeforeSearching() {
+    void shouldTrimQueryBeforeSearching() throws IOException {
 
         // Given
         when(amazonProvider.getStore()).thenReturn(Store.AMAZON);
@@ -85,7 +95,7 @@ class ProductSearchServiceTest {
     }
 
     @Test
-    void shouldUseEmptyQueryWhenQueryIsNull() {
+    void shouldUseEmptyQueryWhenQueryIsNull() throws IOException {
 
         // Given
         when(amazonProvider.getStore()).thenReturn(Store.AMAZON);
@@ -106,7 +116,7 @@ class ProductSearchServiceTest {
     }
 
     @Test
-    void shouldContinueWhenProviderThrowsException() {
+    void shouldContinueWhenProviderThrowsException() throws IOException {
 
         // Given
         ProductSearchResult kabumResult = mock(ProductSearchResult.class);
@@ -132,7 +142,7 @@ class ProductSearchServiceTest {
     }
 
     @Test
-    void shouldReturnEmptyListWhenProvidersReturnNothing() {
+    void shouldReturnEmptyListWhenProvidersReturnNothing() throws IOException {
 
         // Given
         when(amazonProvider.getStore()).thenReturn(Store.AMAZON);
@@ -155,7 +165,7 @@ class ProductSearchServiceTest {
     }
 
     @Test
-    void shouldReturnResultsFromSingleProvider() {
+    void shouldReturnResultsFromSingleProvider() throws IOException {
 
         // Given
         ProductSearchResult amazonResult = mock(ProductSearchResult.class);
@@ -169,6 +179,9 @@ class ProductSearchServiceTest {
         when(kabumProvider.search("Ryzen"))
                 .thenReturn(List.of());
 
+        when(mergeService.merge(anyList()))
+                .thenReturn(List.of(amazonResult));
+
         // When
         List<ProductSearchResult> results = service.search("Ryzen");
 
@@ -178,6 +191,39 @@ class ProductSearchServiceTest {
 
         verify(amazonProvider).search("Ryzen");
         verify(kabumProvider).search("Ryzen");
+        verify(mergeService).merge(anyList());
     }
 
+    @Test
+    void shouldDelegateResultsToMergeService2() throws IOException {
+
+        ProductSearchResult amazonResult = mock(ProductSearchResult.class);
+
+        when(amazonProvider.getStore()).thenReturn(Store.AMAZON);
+        when(kabumProvider.getStore()).thenReturn(Store.KABUM);
+
+        when(amazonProvider.search("Ryzen"))
+                .thenReturn(List.of(amazonResult));
+
+        when(kabumProvider.search("Ryzen"))
+                .thenReturn(List.of());
+
+        when(mergeService.merge(anyList()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.search("Ryzen");
+
+        verify(mergeService).merge(argThat(list ->
+                list.size() == 1 &&
+                        list.contains(amazonResult)
+        ));
+    }
+
+    private List<ProductSearchResult> mergeResults(
+            List<ProductSearchResult> results) {
+
+        return results.stream()
+                .filter(Objects::nonNull)
+                .toList();
+    }
 }

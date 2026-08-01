@@ -100,18 +100,20 @@ shared
 - [x] ConsoleNotificationChannel
 - [x] PriceSearchUseCase
 - [x] Scheduler
-- [ ] Testes Unitários
+- [X] Testes Unitários
 
 ---
 
 ## Sprint 2 — Primeiros Scrapers
 
-- [ ] AmazonScraper
+- [X] AmazonScraper
 - [ ] KaBuMScraper
 - [ ] PichauScraper
 - [ ] Mercado LivreScraper
 - [ ] TerabyteScraper
 - [ ] GlaconScraper
+- [ ] Integração de afiliado AWS (Pesquisar como funciona)
+- [ ] Testes Unitários
 
 ---
 
@@ -121,6 +123,7 @@ shared
 - [ ] Discord
 - [ ] Telegram
 - [ ] Email
+- [ ] Testes Unitários
 
 ---
 
@@ -131,6 +134,7 @@ shared
 - [ ] Banco de dados
 - [ ] Dashboard Web
 - [ ] Docker
+- [ ] Testes Unitários
 
 ---
 

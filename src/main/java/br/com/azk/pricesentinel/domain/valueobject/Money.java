@@ -5,7 +5,7 @@ import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Objects;
 
-public record Money(BigDecimal value) {
+public record Money(BigDecimal value) implements Comparable<Money> {
 
     public Money {
         Objects.requireNonNull(value, "Money cannot be null");
@@ -41,6 +41,11 @@ public record Money(BigDecimal value) {
 
     public Money abs() {
         return new Money(value.abs());
+    }
+
+    @Override
+    public int compareTo(Money other) {
+        return value.compareTo(other.value);
     }
 
     @Override
