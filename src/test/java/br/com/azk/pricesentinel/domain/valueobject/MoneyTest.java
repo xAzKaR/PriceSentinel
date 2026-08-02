@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -134,6 +135,131 @@ class MoneyTest {
         );
 
         assertEquals("Money cannot be null", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Deve criar o valor correto a partir de um double")
+    void shouldCreateMoneyFromDouble() {
+
+        // When
+        Money money = Money.of(999.90);
+
+        // Then
+        assertEquals(
+                BigDecimal.valueOf(999.90),
+                money.value());
+
+    }
+
+    @Test
+    @DisplayName("Deve criar o valor correto a partir de um long")
+    void shouldCreateMoneyFromLong() {
+
+        // When
+        Money money = Money.of(1500L);
+
+        // Then
+        assertEquals(
+                BigDecimal.valueOf(1500L),
+                money.value());
+
+    }
+
+    @Test
+    @DisplayName("Deve validar o valor corretamente de equals")
+    void shouldBeEqualToItself() {
+
+        Money money = Money.of("1000.00");
+
+        assertEquals(money, money);
+
+    }
+
+    @Test
+    @DisplayName("Deve ser igual com valores com escalas diferentes")
+    void shouldBeEqualWhenScaleIsDifferent() {
+
+        Money first = Money.of("1000.0");
+        Money second = Money.of("1000.00");
+
+        assertEquals(first, second);
+
+    }
+
+    @Test
+    @DisplayName("Não dedve ser igual para valores diferentes")
+    void shouldNotBeEqualWhenValuesAreDifferent() {
+
+        Money first = Money.of("1000.00");
+        Money second = Money.of("999.99");
+
+        assertNotEquals(first, second);
+
+    }
+
+    @Test
+    @DisplayName("Não deve ser null")
+    void shouldNotBeEqualToNull() {
+
+        Money money = Money.of("1000.00");
+
+        assertNotEquals(null, money);
+
+    }
+
+    @Test
+    @DisplayName("Não deve ser igual a outro tipo")
+    void shouldNotBeEqualToDifferentType() {
+
+        Money money = Money.of("1000.00");
+
+        assertNotEquals("1000.00", money);
+
+    }
+
+    @Test
+    @DisplayName("HashCode deve ser igual para escalas diferentes")
+    void shouldHaveSameHashCodeWhenScaleIsDifferent() {
+
+        Money first = Money.of("1000.0");
+        Money second = Money.of("1000.00");
+
+        assertEquals(
+                first.hashCode(),
+                second.hashCode());
+
+    }
+
+    @Test
+    @DisplayName("HashCode deve ser dioferente para valores diferentes")
+    void shouldHaveDifferentHashCodeWhenValuesAreDifferent() {
+
+        Money first = Money.of("1000.00");
+        Money second = Money.of("999.99");
+
+        assertNotEquals(
+                first.hashCode(),
+                second.hashCode());
+
+    }
+
+    @Test
+    @DisplayName("Garatir que o Comparable continue consistente com o restante da classe")
+    void shouldBeComparable() {
+
+        List<Money> values = List.of(
+                Money.of("1500"),
+                Money.of("500"),
+                Money.of("1000"));
+
+        List<Money> sorted = values.stream()
+                .sorted()
+                .toList();
+
+        assertEquals(Money.of("500"), sorted.get(0));
+        assertEquals(Money.of("1000"), sorted.get(1));
+        assertEquals(Money.of("1500"), sorted.get(2));
+
     }
 
 }

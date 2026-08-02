@@ -21,7 +21,7 @@ public class ProductSearchController {
 
     @GetMapping("/search")
     public List<ProductSearchResponse> search(
-            @RequestParam String query) {
+            @RequestParam("query") String query) {
 
         return productSearchUseCase.search(query)
                 .stream()

@@ -17,10 +17,13 @@ public class PriceSearchScheduler {
     public void execute() {
 
         log.info("Iniciando busca de preços...");
-
-        priceSearchUseCase.search();
-
+        try {
+            priceSearchUseCase.search();
+        } catch (Exception ex) {
+            log.error(
+                    "Erro executando scheduler",
+                    ex);
+        }
         log.info("Busca finalizada.");
-
     }
 }
