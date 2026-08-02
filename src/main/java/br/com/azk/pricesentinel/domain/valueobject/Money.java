@@ -5,6 +5,7 @@ import java.text.NumberFormat;
 import java.util.Locale;
 import java.util.Objects;
 
+
 public record Money(BigDecimal value) implements Comparable<Money> {
 
     public Money {
@@ -13,6 +14,14 @@ public record Money(BigDecimal value) implements Comparable<Money> {
 
     public static Money of(String value) {
         return new Money(new BigDecimal((value)));
+    }
+
+    public static Money of(double value) {
+        return new Money(BigDecimal.valueOf(value));
+    }
+
+    public static Money of(long value) {
+        return new Money(BigDecimal.valueOf(value));
     }
 
     public static Money of(BigDecimal value) {
@@ -54,6 +63,25 @@ public record Money(BigDecimal value) implements Comparable<Money> {
                 NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
 
         return formatter.format(value);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof Money other)) {
+            return false;
+        }
+
+        return value.compareTo(other.value) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        return value.stripTrailingZeros().hashCode();
     }
 
 }
