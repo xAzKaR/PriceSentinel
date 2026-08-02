@@ -1,36 +1,46 @@
-## PriceSentinel
-
 # 🛡 PriceSentinel
 
 > Never miss the right price.
 
-O **PriceSentinel** é uma aplicação desenvolvida em **Java + Spring Boot** para monitoramento inteligente de preços em lojas online.
+PriceSentinel é uma aplicação desenvolvida em **Java 21 + Spring Boot** para monitoramento inteligente de preços em lojas online.
 
-O objetivo é permitir que o usuário configure produtos e preços-alvo para receber notificações automaticamente quando uma oferta for encontrada.
+O projeto permite cadastrar produtos e preços-alvo, consultar diversas lojas automaticamente e notificar o usuário quando uma oferta atender aos critérios definidos.
 
----
+O principal objetivo deste projeto é servir como laboratório para estudo de:
 
-#  Objetivos
-
-- Monitorar preços automaticamente
-- Comparar com preços-alvo
-- Enviar notificações
 - Arquitetura Hexagonal
-- Código limpo
-- Fácil adição de novas lojas
+- Domain Driven Design (DDD)
+- Clean Architecture
+- Integrações HTTP
+- Scraping com Jsoup
+- Testes Unitários
+- Boas práticas de desenvolvimento Java
 
 ---
 
-#  Arquitetura
+# Funcionalidades
 
-O projeto utiliza princípios de:
+- Monitoramento automático de preços
+- Pesquisa de produtos em múltiplas lojas
+- Comparação com preço-alvo
+- Persistência utilizando H2
+- API REST
+- Agendamento automático (Scheduler)
+- Arquitetura desacoplada para inclusão de novas lojas
+- Alta cobertura de testes unitários
+
+---
+
+# Arquitetura
+
+O projeto segue os princípios de:
 
 - Hexagonal Architecture (Ports & Adapters)
 - Domain Driven Design (DDD)
 - SOLID
 - Clean Code
 
-Estrutura:
+Estrutura do projeto:
 
 ```text
 application
@@ -38,6 +48,7 @@ application
 ├── dto
 ├── mapper
 ├── service
+├── normalization
 └── usecase
 
 domain
@@ -46,20 +57,22 @@ domain
 ├── exception
 ├── model
 ├── port
-├── service
 └── valueobject
 
 infrastructure
 │
 ├── config
+├── constants
+├── controller
+├── http
 ├── notification
 ├── persistence
+│   ├── entity
+│   ├── mapper
+│   └── repository
 ├── provider
 ├── scheduler
 └── scraper
-
-shared
-└── util
 ```
 
 ---
@@ -68,147 +81,159 @@ shared
 
 - Java 21
 - Spring Boot
+- Spring MVC
+- Spring Data JPA
+- Spring Scheduler
+- H2 Database
 - Maven
 - Lombok
 - Jsoup
-- Spring Scheduler
 - JUnit 5
 - Mockito
 
 ---
 
-# Tecnologias planejadas
-
-- Spring Data JPA
-- PostgreSQL
-- Docker
-- Testcontainers
-- GitHub Actions
-
 # Roadmap
+## Sprint 1 — Base do projeto
 
-## Sprint 1 — Fluxo completo (Offline)
-
-- [x] Projeto Spring Boot
-- [x] Estrutura de pacotes
+- [x] Estrutura inicial
+- [x] Arquitetura Hexagonal
 - [x] Domain Models
 - [x] Value Objects
+- [x] Use Cases
 - [x] Ports
-- [x] Configuration Properties
-- [x] FakeStoreScraperAdapter
-- [x] PropertiesPriceTargetProvider
-- [x] ConsoleNotificationChannel
-- [x] PriceSearchUseCase
 - [x] Scheduler
-- [X] Testes Unitários
+- [x] Configuração via Properties
+- [x] Persistência H2
+- [x] API REST
+- [x] Cobertura de testes unitários
 
 ---
 
-## Sprint 2 — Primeiros Scrapers
+## Sprint 2 — Scrapers
 
-- [X] AmazonScraper
-- [ ] KaBuMScraper
-- [ ] PichauScraper
-- [ ] Mercado LivreScraper
-- [ ] TerabyteScraper
-- [ ] GlaconScraper
-- [ ] Integração de afiliado AWS (Pesquisar como funciona)
-- [ ] Testes Unitários
+- [x] Amazon
+- [ ] KaBuM
+- [ ] Pichau
+- [ ] Terabyte
+- [ ] Mercado Livre
+- [ ] Glacon
 
 ---
 
 ## Sprint 3 — Notificações
 
-- [ ] Push Notification
 - [ ] Discord
 - [ ] Telegram
-- [ ] Email
-- [ ] Testes Unitários
+- [ ] E-mail
+- [ ] Push Notification
 
 ---
 
-## Sprint 4 — Dashboard
+## Sprint 4 — Histórico
 
-- [ ] API REST
 - [ ] Histórico de preços
-- [ ] Banco de dados
 - [ ] Dashboard Web
 - [ ] Docker
-- [ ] Testes Unitários
+- [ ] Testcontainers
+- [ ] GitHub Actions
 
 ---
 
-#  Produtos monitorados
+## Sprint 5 — Monetização
 
-Atualmente:
-
-- AMD Ryzen 7 5700X
-- AMD Ryzen 7 5700X3D
-
-Novos produtos poderão ser adicionados via configuração.
-
----
+- [ ] Amazon Associates
+- [ ] Amazon Product Advertising API
+- [ ] Geração automática de links de afiliado
+- [ ] Cache de links
+- [ ] Estatísticas de cliques
 
 # Fluxo da aplicação
 
 ```text
-application.properties
-            │
-            ▼
-
-PriceTargetProvider
-            │
-            ▼
-
-StoreScraper
-            │
-            ▼
-           
-NotificationChannel
+                 Scheduler
+                     │
+                     ▼
+            PriceSearchUseCase
+                     │
+                     ▼
+            PriceSearchService
+                     │
+         ┌───────────┴───────────┐
+         ▼                       ▼
+ PriceTargetProvider     StoreScrapers
+         │                       │
+         └───────────┬───────────┘
+                     ▼
+             NotificationChannel
 ```
 
 ---
 
-## Status
+# Pesquisa de produtos
 
-Sprint 1 em andamento.
+A API disponibiliza um endpoint para pesquisa de produtos.
 
-Fluxo completo funcionando utilizando componentes fake:
-
-- Fake PriceTargetProvider
-- Fake StoreScraper
-- Console Notification
-
-Próxima etapa:
-
-Implementação dos primeiros scrapers reais.
-
-
-# Exemplo de execução
-
-```text
-INFO  Iniciando busca de preços...
-
-INFO  Procurando preço para Ryzen 7 5700X
-
-INFO  Pesquisando produto Ryzen 7 5700X
-
-========================================
-
-Produto : Ryzen 7 5700X
-
-Preço   : R$ 989,90
-
-Loja    : Amazon
-
-========================================
-
-INFO  Busca de preços finalizada.
+```http
+GET /api/products/search?query=Ryzen 7 5700X
 ```
 
+Exemplo de resposta:
 
-#  Autor
+```json
+[
+  {
+    "name": "AMD Ryzen 7 5700X",
+    "price": "R$ 999,90",
+    "store": "AMAZON",
+    "url": "https://amazon.com.br/..."
+  }
+]
+```
 
-Leandro Gomides
+---
 
-Projeto desenvolvido para estudos de arquitetura, integração com lojas online e monitoramento inteligente de preços.
+# Banco de dados
+
+Atualmente o projeto utiliza **H2 Database** em modo arquivo.
+
+```text
+jdbc:h2:file:./database/pricesentinel
+```
+
+Os produtos monitorados são persistidos automaticamente.
+
+---
+
+# Testes
+
+O projeto possui cobertura de testes unitários para:
+
+- Value Objects
+- Services
+- Use Cases
+- Controllers
+- Mappers
+- Providers
+- Scrapers
+- Scheduler
+
+---
+
+# Próximos objetivos
+
+- Comparação inteligente de produtos iguais entre lojas
+- Histórico de preços
+- Gráfico de evolução
+- Notificações em tempo real
+- Dashboard Web
+- Containerização
+- Deploy gratuito
+
+---
+
+# Autor
+
+**Leandro Gomides**
+
+Projeto desenvolvido para estudo de Arquitetura Hexagonal, DDD, Clean Code, integrações HTTP, Web Scraping e monitoramento inteligente de preços.

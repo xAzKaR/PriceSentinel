@@ -3,7 +3,9 @@ package br.com.azk.pricesentinel.infrastructure.scraper.jsoup;
 import br.com.azk.pricesentinel.domain.enums.Store;
 import br.com.azk.pricesentinel.domain.model.ProductSearchResult;
 import br.com.azk.pricesentinel.domain.port.out.ProductSearchProvider;
-import br.com.azk.pricesentinel.infrastructure.scraper.AbstractJsoupScraper;
+import br.com.azk.pricesentinel.infrastructure.constants.StoreUrls;
+import br.com.azk.pricesentinel.infrastructure.http.HtmlClient;
+import br.com.azk.pricesentinel.infrastructure.http.UrlEncoder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.nodes.Document;
@@ -18,7 +20,9 @@ import java.util.Objects;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class AmazonSearchProvider extends AbstractJsoupScraper implements ProductSearchProvider {
+public class AmazonSearchProvider implements ProductSearchProvider {
+
+    private final HtmlClient htmlClient;
 
     private final AmazonProductMapper mapper;
 
@@ -35,7 +39,7 @@ public class AmazonSearchProvider extends AbstractJsoupScraper implements Produc
 
         String url = buildSearchUrl(query);
 
-        Document document = getDocument(url);
+        Document document = htmlClient.get(url);
 
         if (log.isDebugEnabled()) {
             log.debug(document.outerHtml());
@@ -51,9 +55,13 @@ public class AmazonSearchProvider extends AbstractJsoupScraper implements Produc
                 .toList();
     }
 
-    @Override
-    protected String buildSearchUrl(String query) {
-        return SEARCH_URL.formatted(encode(query));
+    private String buildSearchUrl(String query) {
+
+        String encodedQuery =
+                UrlEncoder.encode(query);
+
+        return StoreUrls.AMAZON.formatted(encodedQuery);
+
     }
 
     private Elements findProductsCards(Document document) {
