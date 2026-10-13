@@ -2,7 +2,7 @@
 
 > Never miss the right price.
 
-PriceSentinel é uma aplicação desenvolvida em **Java 21 + Spring Boot** para monitoramento inteligente de preços em lojas online.
+PriceSentinel é uma aplicação desenvolvida em **Java 25 + Spring Boot** para monitoramento inteligente de preços em lojas online.
 
 O projeto permite cadastrar produtos e preços-alvo, consultar diversas lojas automaticamente e notificar o usuário quando uma oferta atender aos critérios definidos.
 
@@ -79,7 +79,7 @@ infrastructure
 
 # Tecnologias
 
-- Java 21
+- Java 25
 - Spring Boot
 - Spring MVC
 - Spring Data JPA
