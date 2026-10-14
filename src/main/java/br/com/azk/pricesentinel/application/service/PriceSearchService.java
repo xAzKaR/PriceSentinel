@@ -64,11 +64,8 @@ public class PriceSearchService {
             return;
         }
 
-//TODO Comentado temporariamente 31/07/2026
-//        if (result.getPrice().isLessThanOrEqual(target.getTargetPrice())) {
-//            notificationChannels.forEach(channel -> channel.send(result));
-//        }
-
-        notificationChannels.forEach(channel -> channel.send(result));
+        if (result.getPrice().isLessThanOrEqual(target.getTargetPrice())) {
+            notificationChannels.forEach(channel -> channel.send(result));
+        }
     }
 }
