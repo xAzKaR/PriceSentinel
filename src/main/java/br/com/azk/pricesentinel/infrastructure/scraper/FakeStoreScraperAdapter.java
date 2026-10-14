@@ -7,6 +7,8 @@ import br.com.azk.pricesentinel.domain.model.Product;
 import br.com.azk.pricesentinel.domain.port.out.StoreScraper;
 import br.com.azk.pricesentinel.domain.valueobject.Money;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -14,6 +16,11 @@ import java.util.Optional;
 
 @Slf4j
 @Component
+@ConditionalOnProperty(
+        prefix = "pricesentinel.scraper.fake",
+        name = "enabled",
+        havingValue = "true")
+@Profile("!prod")
 public class FakeStoreScraperAdapter implements StoreScraper {
     @Override
     public Optional<PriceResult> search(Product product) {

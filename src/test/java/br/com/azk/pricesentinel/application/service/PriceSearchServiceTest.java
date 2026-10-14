@@ -69,6 +69,7 @@ class PriceSearchServiceTest {
 
         verify(scraperOne).search(product);
         verify(scraperTwo).search(product);
+        verifyNoInteractions(notificationChannelOne, notificationChannelTwo);
     }
 
     @Test
@@ -92,8 +93,33 @@ class PriceSearchServiceTest {
 
         service.search();
 
-        verify(notificationChannelOne).send(result);
-        verify(notificationChannelTwo).send(result);
+        verify(notificationChannelOne, times(1)).send(result);
+        verify(notificationChannelTwo, times(1)).send(result);
+    }
+
+    @Test
+    @DisplayName("Deve enviar notificação quando o preço encontrado for igual ao alvo")
+    void shouldNotifyWhenPriceIsEqualToTarget() {
+
+        Product product = mock(Product.class);
+        when(product.getName()).thenReturn("Ryzen 7 5700X");
+
+        PriceTarget target = mock(PriceTarget.class);
+        when(target.getProduct()).thenReturn(product);
+        when(target.getTargetPrice()).thenReturn(Money.of("1000"));
+
+        PriceResult result = mock(PriceResult.class);
+        when(result.getPrice()).thenReturn(Money.of("1000"));
+
+        when(targetProvider.findAll()).thenReturn(List.of(target));
+
+        when(scraperOne.search(product)).thenReturn(Optional.of(result));
+        when(scraperTwo.search(product)).thenReturn(Optional.empty());
+
+        service.search();
+
+        verify(notificationChannelOne, times(1)).send(result);
+        verify(notificationChannelTwo, times(1)).send(result);
     }
 
     @Test
@@ -117,8 +143,7 @@ class PriceSearchServiceTest {
 
         service.search();
 
-//        verifyNoInteractions(notificationChannelOne);
-//        verifyNoInteractions(notificationChannelTwo);
+        verifyNoInteractions(notificationChannelOne, notificationChannelTwo);
     }
 
     @Test
@@ -144,6 +169,7 @@ class PriceSearchServiceTest {
 
         verify(scraperOne).search(product);
         verify(scraperTwo).search(product);
+        verifyNoInteractions(notificationChannelOne, notificationChannelTwo);
     }
 
     @Test
